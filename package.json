@@ -1,0 +1,43 @@
+{
+  "name": "hera",
+  "version": "1.0.0-alpha.1",
+  "description": "Backend for forums v3 using Polka and TypeScript.",
+  "main": "out/index.js",
+  "repository": "https://github.com/mythicmc/Hera.git",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon -w src -w package.json -w config.json -e js,ts,mjs,json --exec \"tsc && node\" .",
+    "start": "node .",
+    "build": "tsc",
+    "lint": "eslint . --ext .js,.ts,.tsx && tsc --noEmit"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "eris": "^0.13.3",
+    "mongodb": "^3.6.2",
+    "polka": "^0.5.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.7",
+    "@types/mongodb": "^3.5.27",
+    "@types/polka": "^0.5.1",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
+    "eslint": "^7.10.0",
+    "eslint-config-standard-with-typescript": "^19.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "husky": "^4.3.0",
+    "nodemon": "^2.0.4",
+    "typescript": "^4.0.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  }
+}
