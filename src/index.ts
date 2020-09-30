@@ -26,7 +26,7 @@ server.use((req, res, next) => {
   next()
 })
 
-server.get('/', (req, res) => res.send({ alive: true, timestamp: Date.now(), Hotel: 'Trivago' }))
+server.get('/', (req, res) => res.send({ alive: true, Hotel: 'Trivago' }))
 
 server.get('*', (req, res) => res.status(404).send({ error: 'Not Found!' }))
 
@@ -34,3 +34,5 @@ server.listen(port, (err: Error) => {
   if (err) throw err
   console.log(`> Listening on port ${port}.`)
 })
+
+export default server

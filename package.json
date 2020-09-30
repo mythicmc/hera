@@ -8,9 +8,10 @@
   "private": true,
   "scripts": {
     "dev": "nodemon -w src -w package.json -w config.json -e js,ts,mjs,json --exec \"tsc && node\" .",
-    "start": "node .",
+    "start": "node ./src/index.ts",
     "build": "tsc",
-    "lint": "eslint . --ext .js,.ts,.tsx && tsc --noEmit"
+    "lint": "eslint . --ext .js,.ts,.tsx && tsc --noEmit",
+    "test": "ava"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -20,11 +21,13 @@
     "polka": "^0.5.2"
   },
   "devDependencies": {
+    "@ava/typescript": "^1.1.1",
     "@types/cors": "^2.8.7",
     "@types/mongodb": "^3.5.27",
     "@types/polka": "^0.5.1",
     "@typescript-eslint/eslint-plugin": "^4.3.0",
     "@typescript-eslint/parser": "^4.3.0",
+    "ava": "^3.13.0",
     "eslint": "^7.10.0",
     "eslint-config-standard-with-typescript": "^19.0.1",
     "eslint-plugin-import": "^2.22.1",
@@ -33,11 +36,19 @@
     "eslint-plugin-standard": "^4.0.1",
     "husky": "^4.3.0",
     "nodemon": "^2.0.4",
+    "supertest-fetch": "^1.4.3",
     "typescript": "^4.0.3"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
+    }
+  },
+  "ava": {
+    "typescript": {
+      "rewritePaths": {
+        "src/": "out/"
+      }
     }
   }
 }
