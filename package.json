@@ -8,10 +8,10 @@
   "private": true,
   "scripts": {
     "dev": "nodemon -w src -w package.json -w config.json -e js,ts,mjs,json --exec \"tsc && node\" .",
-    "start": "node ./src/index.ts",
+    "start": "node .",
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts,.tsx && tsc --noEmit",
-    "test": "ava"
+    "test": "tsc && ava"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

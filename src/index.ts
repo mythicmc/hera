@@ -1,11 +1,13 @@
 import polka from 'polka'
 import cors from 'cors'
 import { json } from 'body-parser'
+import { MongoClient } from 'mongodb'
+import setupDatabase from './database'
+import config from './config'
 
-const server = polka({
-  onError: (err) => console.error('An unhandled error occurred!', err)
-})
 const port = process.env.HERA_PORT && !isNaN(+process.env.HERA_PORT) ? +process.env.HERA_PORT : 8080
+const server = polka({ onError: (err) => console.error('An unhandled error occurred!', err) })
+const client = new MongoClient(config.mongoUrl, { useUnifiedTopology: true })
 
 // Support CORS.
 server.use(cors({
@@ -26,13 +28,21 @@ server.use((req, res, next) => {
   next()
 })
 
-server.get('/', (req, res) => res.send({ alive: true, Hotel: 'Trivago' }))
+server.get('/', (req, res) => res.send({ alive: true, timestamp: Date.now(), Hotel: 'Trivago' }))
 
 server.get('*', (req, res) => res.status(404).send({ error: 'Not Found!' }))
 
-server.listen(port, (err: Error) => {
-  if (err) throw err
-  console.log(`> Listening on port ${port}.`)
+export const connected = client.connect().then(async () => {
+  const db = client.db('hera')
+  await setupDatabase(db)
+
+  server.listen(port, (err: Error) => {
+    if (err) throw err
+    console.log(`> Listening on port ${port}.`)
+  })
+}).catch(async err => {
+  console.error('Failed to connect to MongoDB!', err)
+  await client.close()
 })
 
 export default server
