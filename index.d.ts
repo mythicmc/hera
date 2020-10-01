@@ -20,4 +20,14 @@ declare global {
     lastLogin: Date
   }
   interface DbMember extends Member { _id: ObjectId }
+
+  interface Forum {
+    name: string,
+    slug: string,
+    description?: string,
+    readableRoleIds?: number[],
+    writableRoleIds?: number[],
+    icon?: string
+  }
+  interface DbForum extends Form { _id: ObjectId }
 }

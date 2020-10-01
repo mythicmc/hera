@@ -6,6 +6,7 @@ import setupDatabase from './database'
 import config from './config'
 // Endpoint imports.
 import { loginEndpoint, logoutEndpoint, registerEndpoint, changePasswordEndpoint, refreshTokenEndpoint } from './login'
+import { createForum, getForum, getForumThreads, getVisibleForums, updateForum } from './api/forums'
 import { getMember, getMembers } from './api/members'
 
 const port = process.env.HERA_PORT && !isNaN(+process.env.HERA_PORT) ? +process.env.HERA_PORT : 8080
@@ -72,6 +73,14 @@ server.get('/api/members', (req, res) => getMembers(req, res, client.db('hera'))
 server.get('/public/members', (req, res) => getMembers(req, res, client.db('hera'))) // Deprecated!
 server.get('/api/member/:name', (req, res) => getMember(req, res, client.db('hera')))
 server.get('/public/member/:name', (req, res) => getMember(req, res, client.db('hera'))) // Deprecated!
+server.get('/api/forums', (req, res) => getVisibleForums(req, res, client.db('hera')))
+server.get('/public/forums', (req, res) => getVisibleForums(req, res, client.db('hera'))) // Deprecated!
+server.get('/api/forum/:slug', (req, res) => getForum(req, res, client.db('hera')))
+server.get('/public/forum/:slug', (req, res) => getForum(req, res, client.db('hera'))) // Deprecated!
+server.get('/api/forum/:slug/threads', (req, res) => getForumThreads(req, res, client.db('hera')))
+server.get('/public/forum/:slug/threads', (req, res) => getForumThreads(req, res, client.db('hera'))) // Deprecated!
+server.post('/api/forum', (req, res) => createForum(req, res, client.db('hera')))
+server.patch('/api/forum/:slug', (req, res) => updateForum(req, res, client.db('hera')))
 
 server.all('*', (req, res) => res.status(404).send({ error: 'Endpoint not found!' }))
 

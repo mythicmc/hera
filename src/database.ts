@@ -47,7 +47,7 @@ export default async (db: Db) => {
             _id: { bsonType: 'objectId' },
             id: { bsonType: 'int' }, // TODO
             title: { bsonType: 'string' },
-            parentForumId: { bsonType: 'int' },
+            parentForumId: { bsonType: 'string' },
             poll: { // Optional.
               bsonType: 'object',
               properties: {},
