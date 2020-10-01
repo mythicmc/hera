@@ -7,6 +7,7 @@ import server, { connected } from '../index'
 const test = anyTest as TestInterface<{ fetch: FetchFunction }>
 
 test.before(async t => {
+  t.timeout(5000, 'Database/server took too long to connect/start!')
   await connected // Rely on the server to have begun listening (should make the behavior better).
   t.context.fetch = makeFetch((server as any).server as Server)
 })

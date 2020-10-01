@@ -10,7 +10,7 @@ export default async (db: Db) => {
       validator: {
         $jsonSchema: {
           bsonType: 'object',
-          required: ['id', 'name', 'ip', 'email', 'createdOn', 'roleIds', 'validated', 'lastLogin'],
+          required: ['name', 'ip', 'email', 'createdOn', 'roleIds', 'validated', 'lastLogin'],
           additionalProperties: false,
           properties: {
             _id: { bsonType: 'objectId' },
@@ -73,7 +73,7 @@ export default async (db: Db) => {
       validator: {
         $jsonSchema: {
           bsonType: 'object',
-          required: ['id', 'name', 'slug'],
+          required: ['name', 'slug'],
           additionalProperties: false,
           properties: {
             _id: { bsonType: 'objectId' },
@@ -140,7 +140,7 @@ export default async (db: Db) => {
       validator: {
         $jsonSchema: {
           bsonType: 'object',
-          required: ['memberId', 'accessToken', 'refreshToken', 'createdOn'],
+          required: ['memberId', 'accessToken', 'createdOn'],
           additionalProperties: false,
           properties: {
             _id: { bsonType: 'objectId' },
