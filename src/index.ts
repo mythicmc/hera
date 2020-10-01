@@ -6,6 +6,7 @@ import setupDatabase from './database'
 import config from './config'
 // Endpoint imports.
 import { loginEndpoint, logoutEndpoint, registerEndpoint, changePasswordEndpoint, refreshTokenEndpoint } from './login'
+import { getMember, getMembers } from './api/members'
 
 const port = process.env.HERA_PORT && !isNaN(+process.env.HERA_PORT) ? +process.env.HERA_PORT : 8080
 const server = polka({ onError: (err) => console.error('An unhandled error occurred!', err) })
@@ -21,9 +22,9 @@ server.use(cors({
 // Define missing functions from Express.
 server.use((req, res, next) => {
   res.send = (body) => {
-    const isObj = typeof body === 'object'
-    if (isObj) res.setHeader('content-type', 'application/json')
-    res.end(Buffer.isBuffer(body) || !isObj ? body : JSON.stringify(body))
+    const isJSON = typeof body === 'object' || Array.isArray(body)
+    if (isJSON) res.setHeader('content-type', 'application/json')
+    res.end(Buffer.isBuffer(body) || !isJSON ? body : JSON.stringify(body))
     return res
   }
   res.status = (code) => { res.statusCode = code; return res }
@@ -42,9 +43,37 @@ server.get('/refreshToken', (req, res) => refreshTokenEndpoint(req, res, client.
 server.post('/refreshToken', (req, res) => refreshTokenEndpoint(req, res, client.db('hera')))
 server.post('/changePassword', (req, res) => changePasswordEndpoint(req, res, client.db('hera')))
 
-// TODO: Auth filter /api requests.
+// Exclude certain endpoints.
+const publicEndpoints = ['/api/member', '/api/members']
+const excludedEndpoints = ['/api/member/@me']
+// Auth filter /api/ requests and log IPs.
+server.use('/api', async (req: ApiRequest, res, next) => {
+  // Check for authentication.
+  if (
+    publicEndpoints.find(e => req.path.startsWith(e)) &&
+    !excludedEndpoints.find(e => req.path.startsWith(e))
+  ) return next()
+  if (typeof req.headers.authorization !== 'string') {
+    return res.status(401).send({ error: 'No authorization token provided!' })
+  }
+  const accessToken = req.headers.authorization
+  const token = await client.db('hera').collection('tokens').findOne({ accessToken })
+  if (!token) return res.status(401).send({ error: 'Invalid access token!' })
+  // Update the IP before proceeding.
+  const result = await client.db('hera').collection('members').findOneAndUpdate(
+    { name: token.memberId }, { $set: { ip: req.socket.remoteAddress } }, { returnOriginal: false }
+  )
+  req.member = result.value
+  next()
+})
 
-server.all('*', (req, res) => res.status(404).send({ error: 'Endpoint Not Found!' }))
+// Register /api/ endpoints.
+server.get('/api/members', (req, res) => getMembers(req, res, client.db('hera')))
+server.get('/public/members', (req, res) => getMembers(req, res, client.db('hera'))) // Deprecated!
+server.get('/api/member/:name', (req, res) => getMember(req, res, client.db('hera')))
+server.get('/public/member/:name', (req, res) => getMember(req, res, client.db('hera'))) // Deprecated!
+
+server.all('*', (req, res) => res.status(404).send({ error: 'Endpoint not found!' }))
 
 export const connected = client.connect().then(async () => {
   const db = client.db('hera')

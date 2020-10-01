@@ -1,8 +1,23 @@
 import Express from 'express'
-import { Db } from 'mongodb'
+import { Db, ObjectId } from 'mongodb'
 
 declare global {
-  type Endpoint = (req: Express.Request, res: Express.Response, db: Db) => void
+  interface ApiRequest extends Express.Request { member?: DbMember }
+  type Endpoint = (req: ApiRequest, res: Express.Response, db: Db) => void
 
-  // TODO: Database interfaces.
+  // Database interfaces.
+  interface Member {
+    discordId?: string,
+    name: string,
+    avatar?: string,
+    splash?: string,
+    ip: string,
+    email: string,
+    createdOn: Date,
+    roleIds: string[],
+    signature?: string,
+    validated: boolean,
+    lastLogin: Date
+  }
+  interface DbMember extends Member { _id: ObjectId }
 }

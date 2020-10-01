@@ -68,13 +68,20 @@ export const registerEndpoint: Endpoint = async (req, res, db) => {
       typeof req.body.username !== 'string' || typeof req.body.email !== 'string' ||
       typeof req.body.password !== 'string'
     ) return res.status(400).send({ error: 'Invalid request body!' })
-    const member: { name: string, email: string, ip?: string } = {
-      name: req.body.username, email: req.body.email
+    const date = new Date()
+    const member: Member = {
+      name: req.body.username,
+      email: req.body.email,
+      createdOn: date,
+      lastLogin: date,
+      validated: false,
+      roleIds: [],
+      ip: ''
     }
 
     // Set the IP.
-    const forwards = req.headers['x-forwarded-for'] ?? req.connection.remoteAddress
-    member.ip = Array.isArray(forwards) ? forwards[0] : forwards
+    const forwards = req.headers['x-forwarded-for'] ?? req.socket.remoteAddress
+    member.ip = Array.isArray(forwards) ? forwards[0] : forwards ?? ''
 
     // Validate username and e-mails.
     if (!/^[a-zA-Z0-9_]*$/.test(member.name)) return res.status(400).send({ error: 'Invalid username!' })
@@ -89,10 +96,7 @@ export const registerEndpoint: Endpoint = async (req, res, db) => {
     }
 
     // Create new member.
-    const date = new Date()
-    await db.collection('members').insertOne({
-      ...member, createdOn: date, lastLogin: date, validated: false, roleIds: []
-    })
+    await db.collection('members').insertOne(member)
     await db.collection('hashes').insertOne({ memberId: member.name, hash: await hashPassword(req.body.password) })
     // TODO: Send verification email.
     return res.status(200).send({ success: true })
@@ -130,7 +134,7 @@ export const refreshTokenEndpoint: Endpoint = async (req, res, db) => {
     }
     const accessToken = getRandomBytes(25).toString('base64')
     const result = await db.collection('tokens').updateOne(
-      { refreshToken: req.headers.authorization }, { accessToken }
+      { refreshToken: req.headers.authorization }, { $set: { accessToken } }
     )
     if (result.modifiedCount === 0) return res.status(401).send({ error: 'Invalid access token!' })
     return res.status(200).send({ refreshToken: req.headers.authorization, accessToken })
