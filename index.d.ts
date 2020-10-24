@@ -29,5 +29,31 @@ declare global {
     writableRoleIds?: number[],
     icon?: string
   }
-  interface DbForum extends Form { _id: ObjectId }
+  interface DbForum extends Forum { _id: ObjectId }
+
+  interface Thread {
+    id: string,
+    title: string,
+    parentForumId: string,
+    poll: { [key: string]: string[] },
+    authorId: string,
+    createdOn: Date,
+    closed: boolean,
+    pinned: boolean,
+    hidden: boolean
+  }
+  interface DbThread extends Thread { _id: ObjectId }
+
+  interface Post {
+    id: string,
+    authorId: string,
+    content: string,
+    rawContent: string,
+    threadId: string,
+    createdOn: Date,
+    logs?: Array<{ editorId: string, editTime: Date, oldContent: string, reason: string }>,
+    likes?: string[],
+    dislikes?: string[]
+  }
+  interface DbPost extends Post { _id: ObjectId }
 }

@@ -22,6 +22,7 @@ export default async (db: Db) => {
             ip: { bsonType: 'string' },
             email: { bsonType: 'string' },
             createdOn: { bsonType: 'date' },
+            // TODO
             roleIds: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'string' } },
             signature: { bsonType: 'string' }, // Optional.
             validated: { bsonType: 'bool' },
@@ -45,7 +46,7 @@ export default async (db: Db) => {
           additionalProperties: false,
           properties: {
             _id: { bsonType: 'objectId' },
-            id: { bsonType: 'int' }, // TODO
+            id: { bsonType: 'string' },
             title: { bsonType: 'string' },
             parentForumId: { bsonType: 'string' },
             poll: { // Optional.
@@ -82,6 +83,7 @@ export default async (db: Db) => {
             slug: { bsonType: 'string' },
             // Optional properties.
             description: { bsonType: 'string' },
+            // TODO
             readableRoleIds: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'int' } },
             writableRoleIds: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'int' } },
             icon: { bsonType: 'string' }
@@ -103,11 +105,11 @@ export default async (db: Db) => {
           additionalProperties: false,
           properties: {
             _id: { bsonType: 'objectId' },
-            id: { bsonType: 'int' }, // TODO
+            id: { bsonType: 'string' },
             authorId: { bsonType: 'string' },
             content: { bsonType: 'string' },
             rawContent: { bsonType: 'string' },
-            threadId: { bsonType: 'int' },
+            threadId: { bsonType: 'string' },
             createdOn: { bsonType: 'date' },
             logs: {
               bsonType: 'array',
@@ -117,15 +119,15 @@ export default async (db: Db) => {
                 required: ['editorId', 'editTime', 'oldContent', 'reason'],
                 additionalProperties: false,
                 properties: {
-                  editorId: { bsonType: 'int' },
+                  editorId: { bsonType: 'string' },
                   editTime: { bsonType: 'date' },
                   oldContent: { bsonType: 'string' },
                   reason: { bsonType: 'string' }
                 }
               }
             },
-            likes: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'int' } },
-            dislikes: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'int' } }
+            likes: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'string' } },
+            dislikes: { bsonType: 'array', uniqueItems: true, items: { bsonType: 'string' } }
           }
         }
       }

@@ -8,6 +8,7 @@ import config from './config'
 import { loginEndpoint, logoutEndpoint, registerEndpoint, changePasswordEndpoint, refreshTokenEndpoint } from './login'
 import { createForum, getForum, getForumThreads, getVisibleForums, updateForum } from './api/forums'
 import { getMember, getMembers } from './api/members'
+import { createThread, getThread, getThreadReplies } from './api/threads'
 
 const port = process.env.HERA_PORT && !isNaN(+process.env.HERA_PORT) ? +process.env.HERA_PORT : 8080
 const server = polka({ onError: (err) => console.error('An unhandled error occurred!', err) })
@@ -45,27 +46,28 @@ server.post('/refreshToken', (req, res) => refreshTokenEndpoint(req, res, client
 server.post('/changePassword', (req, res) => changePasswordEndpoint(req, res, client.db('hera')))
 
 // Exclude certain endpoints.
-const publicEndpoints = ['/api/member', '/api/members']
+const publicEndpoints = ['/api/member', '/api/members', '/api/forums', '/api/forum', '/api/thread']
 const excludedEndpoints = ['/api/member/@me']
 // Auth filter /api/ requests and log IPs.
 server.use('/api', async (req: ApiRequest, res, next) => {
-  // Check for authentication.
-  if (
+  try {
+    // Check for authentication.
+    const skippable = req.method === 'GET' && // Exclude other methods.
     publicEndpoints.find(e => req.path.startsWith(e)) &&
     !excludedEndpoints.find(e => req.path.startsWith(e))
-  ) return next()
-  if (typeof req.headers.authorization !== 'string') {
-    return res.status(401).send({ error: 'No authorization token provided!' })
-  }
-  const accessToken = req.headers.authorization
-  const token = await client.db('hera').collection('tokens').findOne({ accessToken })
-  if (!token) return res.status(401).send({ error: 'Invalid access token!' })
-  // Update the IP before proceeding.
-  const result = await client.db('hera').collection('members').findOneAndUpdate(
-    { name: token.memberId }, { $set: { ip: req.socket.remoteAddress } }, { returnOriginal: false }
-  )
-  req.member = result.value
-  next()
+    if (typeof req.headers.authorization !== 'string') {
+      return skippable ? next() : res.status(401).send({ error: 'No authorization token provided!' })
+    }
+    const accessToken = req.headers.authorization
+    const token = await client.db('hera').collection('tokens').findOne({ accessToken })
+    if (!token) return res.status(401).send({ error: 'Invalid access token!' })
+    // Update the IP before proceeding.
+    const result = await client.db('hera').collection('members').findOneAndUpdate(
+      { name: token.memberId }, { $set: { ip: req.socket.remoteAddress } }, { returnOriginal: false }
+    )
+    req.member = result.value
+    next()
+  } catch (e) { next('Internal Server Error!') }
 })
 
 // Register /api/ endpoints.
@@ -81,6 +83,11 @@ server.get('/api/forum/:slug/threads', (req, res) => getForumThreads(req, res, c
 server.get('/public/forum/:slug/threads', (req, res) => getForumThreads(req, res, client.db('hera'))) // Deprecated!
 server.post('/api/forum', (req, res) => createForum(req, res, client.db('hera')))
 server.patch('/api/forum/:slug', (req, res) => updateForum(req, res, client.db('hera')))
+server.get('/api/thread/:id', (req, res) => getThread(req, res, client.db('hera')))
+server.get('/public/thread/:id', (req, res) => getThread(req, res, client.db('hera'))) // Deprecated!
+server.get('/api/thread/:id/replies', (req, res) => getThreadReplies(req, res, client.db('hera')))
+server.get('/public/thread/:id/replies', (req, res) => getThreadReplies(req, res, client.db('hera'))) // Deprecated!
+server.post('/api/thread', (req, res) => createThread(req, res, client.db('hera')))
 
 server.all('*', (req, res) => res.status(404).send({ error: 'Endpoint not found!' }))
 

@@ -27,8 +27,8 @@ export const getForum: Endpoint = async (req, res, db) => {
   try {
     if (!req.params.slug) return res.status(404).send({ error: 'No forum slug specified!' })
     const forum = await db.collection('forums').findOne({ slug: req.params.slug })
-    delete forum._id
     if (!forum) return res.status(404).send({ error: 'This forum does not exist!' })
+    delete forum._id
     return res.status(200).send(forum)
   } catch (e) { return res.status(500).send({ error: 'Internal Server Error!' }) }
 }
@@ -98,7 +98,7 @@ export const createForum: Endpoint = async (req, res, db) => {
     else if (!/^[a-z0-9_-]*$/.test(req.body.slug)) return res.status(400).send({ error: 'Invalid slug!' })
 
     if ( // Check if forum with this slug already exists.
-      await db.collection('forums').findOne({ slug: req.params.slug })
+      await db.collection('forums').findOne({ slug: req.body.slug })
     ) return res.status(409).send({ error: 'A forum with this slug already exists!' })
 
     const forum = {
