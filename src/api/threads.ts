@@ -45,6 +45,7 @@ export const getThreadReplies: Endpoint = async (req, res, db) => {
 }
 
 /*
+TODO:
 export const updateThread: Endpoint = async (req, res, db) => {
   try {
     if (!req.params.slug) return res.status(404).send({ error: 'No forum slug specified!' })
@@ -110,7 +111,7 @@ export const createThread: Endpoint = async (req, res, db) => {
       id: await nanoid(),
       authorId: req.member?.name ?? '',
       content: req.body.content,
-      rawContent: req.body.rawContent,
+      rawContent: req.body.content,
       threadId: thread.id,
       createdOn: thread.createdOn
     }

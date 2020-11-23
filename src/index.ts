@@ -7,8 +7,9 @@ import config from './config'
 // Endpoint imports.
 import { loginEndpoint, logoutEndpoint, registerEndpoint, changePasswordEndpoint, refreshTokenEndpoint } from './login'
 import { createForum, getForum, getForumThreads, getVisibleForums, updateForum } from './api/forums'
-import { getMember, getMembers } from './api/members'
+import { createPost, getPost, likePost, dislikePost, removePostLike } from './api/posts'
 import { createThread, getThread, getThreadReplies } from './api/threads'
+import { getMember, getMembers } from './api/members'
 
 const port = process.env.HERA_PORT && !isNaN(+process.env.HERA_PORT) ? +process.env.HERA_PORT : 8080
 const server = polka({ onError: (err) => console.error('An unhandled error occurred!', err) })
@@ -88,6 +89,12 @@ server.get('/public/thread/:id', (req, res) => getThread(req, res, client.db('he
 server.get('/api/thread/:id/replies', (req, res) => getThreadReplies(req, res, client.db('hera')))
 server.get('/public/thread/:id/replies', (req, res) => getThreadReplies(req, res, client.db('hera'))) // Deprecated!
 server.post('/api/thread', (req, res) => createThread(req, res, client.db('hera')))
+server.get('/api/post/:id', (req, res) => getPost(req, res, client.db('hera')))
+server.get('/public/post/:id', (req, res) => getPost(req, res, client.db('hera'))) // Deprecated!
+server.post('/api/post/:id/like', (req, res) => likePost(req, res, client.db('hera')))
+server.post('/api/post/:id/dislike', (req, res) => dislikePost(req, res, client.db('hera')))
+server.delete('/api/post/:id/like', (req, res) => removePostLike(req, res, client.db('hera')))
+server.post('/api/post/:threadId', (req, res) => createPost(req, res, client.db('hera')))
 
 server.all('*', (req, res) => res.status(404).send({ error: 'Endpoint not found!' }))
 
